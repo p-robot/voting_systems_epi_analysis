@@ -1,0 +1,254 @@
+---
+title: "fmd_summaries.Rmd"
+author: "W. Probert"
+date: "29/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(ggplot2)
+require(tidyverse)
+require(reshape2)
+library(gt)
+```
+
+
+## Projections
+
+#### Visual summary of the projections
+
+```{r}
+# Parameters
+fmd_datasets <- c(
+    "fmd_data_cleaned_duration.csv",
+    "fmd_data_cleaned_cattle_culled.csv")
+
+# Read the data
+dataset_list <- list(); i <- 1
+for(dataset in fmd_datasets){
+  df <- read.csv(file.path("..", "..", "data", "processed", dataset))
+  df <- melt(df, id.vars = c("objective", "model", "run"))
+  df$dataset <- dataset
+  dataset_list[[i]] <- df; i <- i + 1
+}
+df_values <- do.call(rbind, dataset_list)
+
+# Make variables plot nicely
+df_values <- rename(df_values, intervention = variable)
+df_values$model <- paste("Model", df_values$model)
+df_values$intervention <- toupper(df_values$intervention)
+
+df_values$objective_label <- paste0(toupper(substring(df_values$objective, 1, 1)), substring(df_values$objective, 2))
+df_values$objective_label <- gsub("_", " ", df_values$objective_label)
+```
+
+
+```{r, fig.width = 10, fig.height = 6}
+# Plot projections across models and interventions
+ggplot(df_values, aes(x = intervention, y = value, colour = intervention, fill = intervention)) + 
+  geom_violin(width = 1.0, alpha = 0.8) + 
+  facet_grid(cols = vars(model), rows = vars(objective_label), scales = "free_y") + 
+  scale_fill_brewer(name = "Intervention", palette = "Set1") + 
+  scale_colour_brewer(name = "Intervention", palette = "Set1") + 
+  scale_y_continuous(labels = scales::comma) + 
+  xlab("") + ylab("") + 
+  theme_classic() + 
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 14),
+    strip.text = element_text(size = 20)
+  )
+# Note: 100 missing values for model B, ring culling are automatically removed
+```
+
+$$\\[1in]$$
+
+#### Table of summary statistics of the projections
+
+Tables of summary statistics of the projections in the data across interventions and models.  Note the 100 missing values in model B for ring-culling intervention.  
+
+$$\\[0.25in]$$
+
+```{r}
+df_summaries <- df_values %>%
+  group_by(model, intervention, objective_label) %>%
+  summarise(
+    median = median(value), 
+    min = min(value), 
+    max = max(value), 
+    mean = mean(value), 
+    sd = sd(value), 
+    n = n(), 
+    .groups = 'drop')
+
+as.data.frame(df_summaries) %>%
+  filter(objective_label == "Duration") %>%
+  gt(
+    rowname_col = "intervention",
+    groupname_col = "model") %>%
+  tab_header(title = "Summary of FMD data; Objective: Duration") %>%
+  fmt_number(
+    columns = vars(mean, sd),
+    decimals = 2,
+    use_seps = FALSE
+  )
+```
+
+$$\\[0.25in]$$
+
+```{r}
+as.data.frame(df_summaries) %>%
+  filter(objective_label == "Cattle culled") %>%
+  gt(
+    rowname_col = "intervention",
+    groupname_col = "model") %>%
+  tab_header(title = "Summary of FMD data; Objective: Cattle culled") %>%
+  fmt_number(
+    columns = vars(mean, sd),
+    decimals = 2,
+    use_seps = FALSE
+  )
+```
+
+$$\\[1in]$$
+
+### Summaries of **within-model** rankings of projections of interventions
+
+```{r}
+df_rank <- df_values %>%
+  group_by(model, objective, run) %>% 
+  mutate(intervention_rank = rank(value)) %>%
+  arrange(model, objective, run, intervention, value, intervention_rank)
+```
+
+Proportion of simulation runs in which each intervention has a particular rank, stratified by objective and model.  
+
+$$\\[0.25in]$$
+
+```{r}
+df_rank_summary <- df_rank %>%
+  group_by(model, objective, intervention) %>% 
+  count(intervention_rank, .drop = FALSE)
+
+as.data.frame(df_rank_summary) %>%
+  gt(
+    rowname_col = "objective",
+    groupname_col = "model") %>%
+  tab_header(title = "Percent of runs each intervention is given a certain rank across models, objectives",
+             subtitle = "Number of runs is ~100 so n approximates percent") %>%
+  fmt_number(
+    columns = vars(n),
+    decimals = 0,
+    use_seps = FALSE
+  )
+```
+
+$$\\[1in]$$
+
+### Summaries of ties in **within-model** rankings of projections of interventions
+
+Proportion of times that ties occur in the minimum projected value, stratified by objective and model.
+
+$$\\[0.25in]$$
+
+```{r}
+df_ties <- df_values %>%
+  group_by(model, objective, run) %>% 
+  mutate(number_winners = sum(value[!is.na(value)] == min(value[!is.na(value)]))) %>%
+  arrange(model, objective, run, number_winners) %>%
+  select(model, objective, run, number_winners)
+
+df_ties <- df_ties %>%
+  mutate(ties_in_winner = number_winners > 1) %>%
+  group_by(model, objective) %>%
+  summarise(
+    prop_ties = 100*mean(ties_in_winner), 
+    .groups = 'drop')
+
+as.data.frame(df_ties) %>%
+  gt(
+    rowname_col = "objective",
+    groupname_col = "model") %>%
+  tab_header(title = "Percent of runs in which there are ties in **best** intervention across models, objectives") %>%
+  fmt_number(
+    columns = vars(prop_ties),
+    decimals = 1,
+    use_seps = FALSE
+  )
+```
+
+$$\\[1in]$$
+
+### Summaries of votes for each intervention (as used in the analysis)
+
+As shown in the above tables of ranks, ties may occur when converting projections into ranks (i.e. there are ranks with non-integer values).  The vote-processing rules used in this analysis requires "full ballots" with no ties in ranks (as would be expected in a typical election; one cannot score a candidate a ranking of 2.5, for instance).  To avoid tied rankings, votes are generated from ranks by splitting ties using randomisation.  There will therefore be slight differences between rankings (in the above tables) and votes (in the tables below).  For brevity, the tables below only show summaries for best and worst ranked interventions.  
+
+$$\\[0.25in]$$
+
+```{r}
+# Parameters
+fmd_datasets <- c(
+    "fmd_data_votes_str_duration.csv",
+    "fmd_data_votes_str_cattle_culled.csv")
+
+# Read the data
+dataset_list <- list(); i <- 1
+for(dataset in fmd_datasets){
+  df <- read.csv(file.path("..", "..", "data", "processed", dataset))
+  df$dataset <- dataset
+  dataset_list[[i]] <- df; i <- i + 1
+}
+df_values <- do.call(rbind, dataset_list)
+df_values$model <- paste("Model", df_values$model)
+```
+
+
+```{r}
+df_values$rank1 <- toupper(df_values$rank1)
+df_values$rank1 <- factor(df_values$rank1, levels <- c("IP", "IPDC", "RC", "V03", "V10"))
+
+df_votes <- df_values %>%
+  group_by(model, objective) %>% 
+  count(rank1, .drop = FALSE)
+  #mutate(percent = 100*n/sum(n)) # if percent is needed
+
+as.data.frame(df_votes) %>%
+  gt(
+    rowname_col = "objective",
+    groupname_col = "model") %>%
+  tab_header(title = "Percent of runs each intervention is voted as **best** across models, objectives",
+             subtitle = "Number of runs is ~100 so n approximates percent") %>%
+  fmt_number(
+    columns = vars(n),
+    decimals = 0,
+    use_seps = FALSE
+  )
+
+```
+
+$$\\[1in]$$
+
+```{r}
+df_values$rank5 <- toupper(df_values$rank5)
+df_values$rank5 <- factor(df_values$rank5, levels <- c("IP", "IPDC", "RC", "V03", "V10"))
+
+df_votes <- df_values %>%
+  group_by(model, objective) %>% 
+  count(rank5, .drop = FALSE)
+  #mutate(percent = 100*n/sum(n))
+
+as.data.frame(df_votes) %>%
+  gt(
+    rowname_col = "objective",
+    groupname_col = "model") %>%
+  tab_header(title = "Percent of runs each intervention is voted as **worst** across models, objectives",
+             subtitle = "Number of runs is ~100 so n approximates percent") %>%
+  fmt_number(
+    columns = vars(n),
+    decimals = 0,
+    use_seps = FALSE
+  )
+```

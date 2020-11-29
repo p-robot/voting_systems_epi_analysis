@@ -1,0 +1,171 @@
+---
+title: "ev_summaries.Rmd"
+author: "W. Probert"
+date: "29/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(ggplot2)
+require(tidyverse)
+require(reshape2)
+library(gt)
+```
+
+
+## Projections
+
+#### Visual summary of the projections
+
+```{r}
+# Parameters
+ev_datasets <- c(
+    "ebola_data_cleaned.csv")
+
+# Read the data
+dataset_list <- list(); i <- 1
+for(dataset in ev_datasets){
+  df <- read.csv(file.path("..", "..", "data", "processed", dataset))
+  df_long <- melt(df, id.vars = c("model"))
+  df_long$dataset <- dataset
+  dataset_list[[i]] <- df_long; i <- i + 1
+}
+df_values <- do.call(rbind, dataset_list)
+
+# Make variables plot nicely
+df_values <- rename(df_values, intervention = variable)
+
+df_values$intervention_label <- paste0(toupper(substring(df_values$intervention, 1, 1)),
+                                       substring(df_values$intervention, 2))
+df_values$intervention_label <- gsub("_", " ", df_values$intervention_label)
+df_values$objective <- "Cases"
+df_values$run <- 1
+```
+
+
+```{r, fig.width = 10, fig.height = 8}
+# Plot projections across models and interventions
+ggplot(df_values, aes(y = model, x = value,
+                      colour = intervention_label, fill = intervention_label)) +
+  geom_point() + 
+  scale_fill_brewer(name = "Intervention", palette = "Set1") +
+  scale_colour_brewer(name = "Intervention", palette = "Set1") +
+  scale_x_continuous(labels = scales::comma) +
+  xlab("Projected caseload") + ylab("Model") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 8),
+    axis.title = element_text(size = 16),
+    legend.text = element_text(size = 14)
+  )
+```
+
+$$\\[1in]$$
+
+#### Table of summary statistics of the projections
+
+There is one mean value per model, so refer to raw data.  
+
+$$\\[1in]$$
+
+### Summaries of ties in **within-model** rankings of projections of interventions
+
+Proportion of times that ties occur in the minimum projected value, stratified by objective and model. **No ties occur in EV data**.  
+
+$$\\[0.25in]$$
+
+```{r}
+df_ties <- df_values %>%
+  group_by(model, objective, run) %>%
+  mutate(number_winners = sum(value[!is.na(value)] == min(value[!is.na(value)]))) %>%
+  arrange(model, objective, run, number_winners) %>%
+  select(model, objective, run, number_winners)
+
+df_ties <- df_ties %>%
+  mutate(ties_in_winner = number_winners > 1) %>%
+  group_by(model, objective) %>%
+  summarise(
+    prop_ties = 100*mean(ties_in_winner),
+    .groups = 'drop')
+
+as.data.frame(df_ties) %>%
+  gt(
+    rowname_col = "objective",
+    groupname_col = "model") %>%
+  tab_header(title = "Percent of runs in which there are ties in **best** intervention across models, objectives") %>%
+  fmt_number(
+    columns = vars(prop_ties),
+    decimals = 1,
+    use_seps = FALSE
+  )
+```
+
+$$\\[1in]$$
+
+### Summaries of votes for each intervention (as used in the analysis)
+
+Given there are no ties in converting the projections to ranks, votes are simply within-model ranks of interventions (rank wrt minimizing caseload).  
+
+$$\\[0.25in]$$
+
+```{r}
+# Parameters
+ev_datasets <- c(
+    "ebola_data_votes_str_cases.csv")
+
+# Read the data
+dataset_list <- list(); i <- 1
+for(dataset in ev_datasets){
+  df <- read.csv(file.path("..", "..", "data", "processed", dataset))
+  df$dataset <- dataset
+  dataset_list[[i]] <- df; i <- i + 1
+}
+df_values <- do.call(rbind, dataset_list)
+df_values$model <- paste("Model", df_values$model)
+```
+
+
+```{r}
+df_values$rank1 <- toupper(df_values$rank1)
+df_values$rank1 <- factor(df_values$rank1, levels <- toupper(unique(df_long$variable)))
+
+df_votes <- df_values %>%
+  count(rank1, .drop = FALSE) %>%
+  mutate(percent = 100*n/sum(n))
+
+as.data.frame(df_votes) %>%
+  gt() %>%
+  tab_header(title = "Percent of simulations in which each intervention is voted as **best** across models",
+             subtitle = "") %>%
+  fmt_number(
+    columns = vars(percent),
+    decimals = 0,
+    use_seps = FALSE
+  )
+
+```
+
+$$\\[1in]$$
+
+```{r}
+df_values$rank6 <- toupper(df_values$rank6)
+df_values$rank6 <- factor(df_values$rank6, levels <- toupper(unique(df_long$variable)))
+
+df_votes <- df_values %>%
+  count(rank6, .drop = FALSE) %>% 
+  mutate(percent = 100*n/sum(n))
+
+as.data.frame(df_votes) %>%
+  gt() %>%
+  tab_header(title = "Percent of simulations in which each intervention is voted as **worst** across models",
+             subtitle = "") %>%
+  fmt_number(
+    columns = vars(percent),
+    decimals = 0,
+    use_seps = FALSE
+  )
+```
+
+$$\\[1in]$$
