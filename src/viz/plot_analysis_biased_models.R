@@ -49,7 +49,7 @@ df_random <- df %>%
 
 
 #################################################################
-# Process FMD data with an objective of minimizing cattle culled
+# Plot FMD data with an objective of minimizing cattle culled
 # ---------------------------------------------------------------
 
 df_plot <- df_random[grepl("fmd_data_votes_cattle_culled", df_random$dataset),]
@@ -81,7 +81,7 @@ ggsave(paste0(output_file_fmd, "_cattle_culled.", file_format), p, width = 4*3+1
 
 
 #####################################################################
-# Process FMD data with an objective of minimizing outbreak duration
+# Plot FMD data with an objective of minimizing outbreak duration
 # -------------------------------------------------------------------
 
 df_plot <- df_random[grepl("fmd_data_votes_duration", df_random$dataset),]
@@ -114,7 +114,7 @@ ggsave(paste0(output_file_fmd, "_duration.", file_format), p, width = 4*3+1, hei
 
 
 ##############################################################
-# Process Ebola data with an objective of minimizing caseload
+# Plot Ebola data with an objective of minimizing caseload
 # ------------------------------------------------------------
 
 df_plot <- df_random[grepl("ebola", df_random$dataset),]
