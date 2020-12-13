@@ -47,10 +47,11 @@ if __name__ == "__main__":
     
     # List for storing results
     results = []
+    extra_output = []
     
     # Loop through datasets
     for filename in dataset_files:
-        
+        print("\n\n")
         # Load dataset
         df_votes = pd.read_csv(join(DATA_DIR, filename))
         
@@ -66,6 +67,12 @@ if __name__ == "__main__":
             
             # Save outputs in an array
             results.append([filename, rule.__name__, winner, now])
+            
+            # Save the additional output for each vote-processing rule
+            print(filename)
+            print(rule.__name__)
+            print(candidates)
+            print(output)
     
     # Coerce array to dataframe
     df_results = pd.DataFrame(results)
@@ -73,3 +80,11 @@ if __name__ == "__main__":
     
     # Output dataframe to output folder
     df_results.to_csv(join(OUTPUT_DIR, "results_analysis1.csv"), index = False)
+    
+    # # Save additional output to file
+    # for filename in dataset_files:
+    #     for i, rule in enumerate(vote_processing_rules):
+    #
+    #         open(join(OUTPUT_DIR, "results_analysis1_extra_output_", rule.__name__ + ".txt")) as f:
+    #             extra_output[i]
+    #
