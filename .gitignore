@@ -4,6 +4,7 @@ data/processed
 output/notebooks/*.html
 refs
 docs
+.Rhistory
 
 # Mac-related files
 .DS_Store
