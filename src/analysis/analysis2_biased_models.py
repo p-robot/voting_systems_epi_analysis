@@ -22,13 +22,14 @@ vote_processing_rules = [\
 
 datasets = [\
     "fmd_data_votes_cattle_culled.csv", \
-    "fmd_data_votes_livestock_culled.csv", \
     "fmd_data_votes_duration.csv", \
     "ebola_data_votes_cases.csv"]
 
-n_biased_models = [5, 5, 5, 37]
-candidates_list = [np.arange(5), np.arange(5), np.arange(5), np.arange(6)]
-n_votes_list = [100, 100, 100, 1]
+n_biased_models = [5, 5, 37]
+candidates_list = [np.arange(5), np.arange(5), np.arange(6)]
+n_votes_list = [100, 100, 1]
+
+n_experiment_replicates = 100
 
 if __name__ == "__main__":
     
@@ -60,37 +61,44 @@ if __name__ == "__main__":
         
         # Add up to N_BIASED_MODELS to the current votes
         for N in np.arange(0, n_biased + 1):
+            print("Running for ", N, " additional models with biased ranks")
+            print("for the ", f, " case study")
             
             # Have the new biased models vote for a single action
             for BIASED_CANDIDATE in cand:
                 
-                vote_cols = [c for c in df_votes.columns if "rank" in c]
-                votes = df_votes[vote_cols].to_numpy().astype(int)
-                
-                # Add an additional model with all 1st preferences for first action
-                # (randomly allocating other preferences)
-                remaining_candidates = [c for c in cand if c != BIASED_CANDIDATE]
-                
-                if N > 0:
-                    new_model_prefs = [[BIASED_CANDIDATE] + \
-                    list(np.random.permutation(remaining_candidates)) for i in range(nvotes * N)]
+                # Replicate each experiment a number of times
+                for exp_replicate in range(1, n_experiment_replicates + 1):
                     
-                    votes = np.vstack((votes, new_model_prefs))
+                    vote_cols = [c for c in df_votes.columns if "rank" in c]
+                    votes = df_votes[vote_cols].to_numpy().astype(int)
                 
-                # Process the votes for all vote-processing rule
-                for rule in vote_processing_rules:
+                    # Add an additional model with all 1st preferences for first action
+                    # (randomly allocating other preferences)
+                    remaining_candidates = [c for c in cand if c != BIASED_CANDIDATE]
+                
+                    if N > 0:
+                        new_model_prefs = [[BIASED_CANDIDATE] + \
+                        list(np.random.permutation(remaining_candidates)) \
+                                                        for i in range(nvotes * N)]
                     
-                    # Run vote-processing rule
-                    (winner, winner_index), (candidates, output) = rule(votes)
+                        votes = np.vstack((votes, new_model_prefs))
+                
+                    # Process the votes for all vote-processing rule
+                    for rule in vote_processing_rules:
                     
-                    # Save outputs in an array
-                    results.append([f, rule.__name__, N, BIASED_CANDIDATE, winner, now])
+                        # Run vote-processing rule
+                        (winner, winner_index), (candidates, output) = rule(votes)
+                    
+                        # Save outputs in an array
+                        results.append([f, rule.__name__, N, \
+                                BIASED_CANDIDATE, exp_replicate, winner,now])
     
     # Coerce array to dataframe
     df_results = pd.DataFrame(results)
     df_results.columns = [\
         "dataset", "vote_processing_rule", "number_biased_models", \
-        "biased_candidate", "winner", "time"]
+        "biased_candidate", "experiment_replicate", "winner", "time"]
     
     df_results = df_results.sort_values(by = ["dataset", "vote_processing_rule",\
         "biased_candidate", "number_biased_models"])
