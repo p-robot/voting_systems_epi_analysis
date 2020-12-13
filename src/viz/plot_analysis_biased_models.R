@@ -15,9 +15,10 @@ require(ggplot2)
 args <- commandArgs(trailingOnly = TRUE)
 
 input_file <- args[1]
-output_file_fmd <- args[2]
-output_file_ebola <- args[3]
-file_format <- args[4]
+output_file_fmd_duration <- args[2]
+output_file_fmd_cattle_culled <- args[3]
+output_file_ebola <- args[4]
+file_format <- args[5]
 
 ######################################
 # Read data and process for plotting
@@ -77,7 +78,7 @@ p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
     xlab("Number of additional models with interventions biased") +
     ylab("Percent of experiments with intervention ranked as best using voting rule")
 
-ggsave(paste0(output_file_fmd, "_cattle_culled.", file_format), p, width = 4*3+1, height = 5*3+0.5)
+ggsave(paste0(output_file_fmd_cattle_culled, ".", file_format), p, width = 4*3+1, height = 5*3+0.5)
 
 
 #####################################################################
@@ -110,7 +111,7 @@ p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
     xlab("Number of additional models with interventions biased") +
     ylab("Percent of experiments with intervention ranked as best using voting rule")
 
-ggsave(paste0(output_file_fmd, "_duration.", file_format), p, width = 4*3+1, height = 5*3+0.5)
+ggsave(paste0(output_file_fmd_duration, ".", file_format), p, width = 4*3+1, height = 5*3+0.5)
 
 
 ##############################################################
