@@ -5,6 +5,7 @@ output/notebooks/*.html
 refs
 docs
 .Rhistory
+output/figures/*.pdf
 
 # Mac-related files
 .DS_Store
