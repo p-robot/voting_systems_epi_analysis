@@ -26,7 +26,7 @@ n_random_models = [50, 50, 370]
 candidates_list = [np.arange(5), np.arange(5), np.arange(6)]
 n_votes_list = [100, 100, 1]
 
-n_experiment_replicates = 100
+
 
 if __name__ == "__main__":
     
@@ -40,6 +40,11 @@ if __name__ == "__main__":
         OUTPUT_FILE = sys.argv[2]
     else: 
         OUTPUT_FILE = "."
+    
+    if len(sys.argv) > 3:
+        n_experiment_replicates = int(sys.argv[3])
+    else: 
+        n_experiment_replicates = 100
     
     # Set seed for repeatable results
     np.random.seed(2022)
