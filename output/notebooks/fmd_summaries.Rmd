@@ -205,6 +205,45 @@ df_values <- do.call(rbind, dataset_list)
 df_values$model <- paste("Model", df_values$model)
 ```
 
+```{r}
+# Summary of vote preferences by intervention
+df_values_long <- melt(df_values, id.vars = c("model", "run", "objective"))
+df_values_long <- df_values_long %>% rename(ranking = variable)
+df_values_long <- df_values_long %>% rename(intervention = value)
+df_values_long$ranking <- as.numeric(substr(df_values_long$ranking, 5, 5))
+
+df_summ <- df_values_long %>% 
+  group_by(objective, ranking, intervention) %>%
+  count()# %>% 
+  #group_by(objective, ranking) %>%
+  #mutate(percent = 100*n/sum(n, na.rm = TRUE))
+
+df_summ %>% filter(objective == "minimize duration") %>%
+  pivot_wider(names_from = ranking, values_from = n) %>%
+  gt()
+
+df_summ %>% filter(objective == "minimize cattle culled") %>%
+  pivot_wider(names_from = ranking, values_from = n) %>%
+  gt()
+
+# df_dur <- df_summ %>%
+#   filter(objective == "minimize duration") %>%
+#   pivot_wider(
+#     names_from = intervention,
+#     values_from = 100*prop
+#   )
+# print(df_dur)
+# 
+# 
+# df_cc <- df_summ %>%
+#   filter(objective == "minimize cattle culled") %>%
+#   pivot_wider(
+#     names_from = intervention,
+#     values_from = 100*prop
+#   )
+# print(df_cc)
+```
+
 
 ```{r}
 df_values$rank1 <- toupper(df_values$rank1)
