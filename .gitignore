@@ -1,3 +1,10 @@
+# Project-related files
+data/raw
+data/processed
+output/notebooks/*.html
+refs
+docs
+
 # Mac-related files
 .DS_Store
 
