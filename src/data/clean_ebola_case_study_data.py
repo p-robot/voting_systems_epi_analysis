@@ -44,14 +44,19 @@ if __name__ == "__main__":
     actions = [re.sub("hospitlaization", "hospitalization", a) for a in actions]
     actions = [re.sub("motality", "mortality", a) for a in actions]
     actions = [re.sub("%", "pc", a) for a in actions]
-
+    
     df.columns = ['model'] + actions
 
     # Tidy model names (remove semicolon, remove white space, make lower case)
     df['model'] = df['model'].str.replace(" ", "")
     df['model'] = df['model'].str.replace(";", "")
     df['model'] = df['model'].str.lower()
-
+    
+    
+    # Rearrange columns so the actions are in alphabetical order
+    actions = sorted(actions)
+    df = df[['model'] + actions]
+    
     df.to_csv(join(OUTPUT_DIR, "ebola_data_cleaned.csv"), index = False)
 
     # Extract only model names

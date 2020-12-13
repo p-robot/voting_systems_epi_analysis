@@ -32,12 +32,16 @@ if __name__ == "__main__":
     # Set seed for repeatable results
     np.random.seed(2019)
     
-    # Read in CSV files
-    models = ["a", "b", "c", "d", "e"]
+    # Read in CSV files (exclude model "b" cause it did not simulation ring culling)
+    models = ["a", "c", "d", "e"]
     datasets = [pd.read_csv(join(DATA_DIR, "model_" + m + ".csv")) for m in models]
     df = pd.concat(datasets)
 
-    actions = df.control.unique()
+    # Define actions (Fixme: save these to file so other scripts can pull them)
+    actions = df.control.unique() # ["ip", "ipdc", "rc", "v03", "v10"]
+    actions = sorted(actions) # Make sure they're sorted alphabetically
+    
+    
     df['livestock_culled'] = df.cattle_culled + df.sheep_culled
 
     # Primary objective for ranking actions
@@ -76,7 +80,7 @@ if __name__ == "__main__":
         df_votes.columns = colnames
         df_votes.insert(2, "objective", "minimize " + obj.replace("_", " "))
         df_votes.to_csv(join(OUTPUT_DIR, "fmd_data_votes_" + obj + ".csv"), index = False)
-    
+        
         df_votes_str = pd.DataFrame(np.append(df_wide[['model', 'run']].values, 
             votes_str, axis = 1))
         df_votes_str.columns = colnames
