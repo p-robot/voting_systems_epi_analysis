@@ -2,12 +2,6 @@
 """
 Script for running vote processing rules on Ebola and FMD case studies.  
 
-Usage
------
-
-
-
-
 W. Probert, 2020
 """
 
@@ -79,7 +73,7 @@ if __name__ == "__main__":
     df_results.columns = ["dataset", "vote_processing_rule", "winner", "time"]
     
     # Output dataframe to output folder
-    df_results.to_csv(join(OUTPUT_DIR, "results_analysis1.csv"), index = False)
+    df_results.to_csv(join(OUTPUT_DIR, "results_main_analysis.csv"), index = False)
     
     # # Save additional output to file
     # for filename in dataset_files:
