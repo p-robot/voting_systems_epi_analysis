@@ -48,7 +48,7 @@ df_values$run <- 1
 # Plot projections across models and interventions
 ggplot(df_values, aes(y = model, x = value,
                       colour = intervention_label, fill = intervention_label)) +
-  geom_point() + 
+  geom_point(size = 3.5, alpha = 0.8) + 
   scale_fill_brewer(name = "Intervention", palette = "Set1") +
   scale_colour_brewer(name = "Intervention", palette = "Set1") +
   scale_x_continuous(labels = scales::comma) +
@@ -124,6 +124,22 @@ for(dataset in ev_datasets){
 }
 df_values <- do.call(rbind, dataset_list)
 df_values$model <- paste("Model", df_values$model)
+```
+
+```{r}
+df_values_long <- melt(df_values, id.vars = c("model"))
+df_values_long <- df_values_long %>% rename(ranking = variable)
+df_values_long <- df_values_long %>% rename(intervention = value)
+df_values_long$ranking <- as.numeric(substr(df_values_long$ranking, 5, 5))
+
+df_summ <- df_values_long %>% 
+  select(ranking, intervention) %>%
+  group_by(ranking, intervention) %>%
+  count()
+
+df_summ %>% 
+  pivot_wider(names_from = ranking, values_from = n) %>%
+  gt()
 ```
 
 
