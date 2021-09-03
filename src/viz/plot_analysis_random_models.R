@@ -71,10 +71,12 @@ p <- ggplot(df_plot, aes(x = number_random_models, y = n, fill = winner)) +
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 20),
         strip.text = element_text(size = 14),
-        legend.position = "top"
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 14),
+        legend.position = "right"
     ) +
     xlab("Number of additional models with interventions ranked randomly") +
-    ylab("Percent of experiments with intervention\nranked as best using voting rule")
+    ylab("Percent of experiments with\nintervention ranked as best")
 
 ggsave(paste0(output_file_fmd, ".", file_format), p, width = 4*3+1, height = 2*3+0.5)
 
@@ -109,13 +111,16 @@ p <- ggplot(df_plot, aes(x = number_random_models, y = n, fill = winner)) +
         panel.grid.minor = element_blank(),
         strip.background = element_blank(),
         panel.spacing = unit(1, "lines"),
-        axis.text.y = element_text(size = 12), 
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 14), 
         axis.title.x = element_text(size = 14), 
-        axis.title.y = element_text(size = 10), 
+        axis.title.y = element_text(size = 16), 
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 14),
         strip.text = element_text(size = 14),
-        legend.position = "top"
+        legend.position = "right"
     ) + 
     xlab("Number of additional models with interventions ranked randomly") + 
-    ylab("Percent of experiments with intervention\nranked as best using voting rule")
+    ylab("Percent of experiments\nwith intervention ranked as best")
 
 ggsave(paste0(output_file_ebola, ".", file_format), p, width = 4*3+1, height = 1*3+0.5)

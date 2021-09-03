@@ -56,7 +56,10 @@ df_random <- df %>%
 df_plot <- df_random[grepl("fmd_data_votes_cattle_culled", df_random$dataset),]
 
 df_plot$winner <- factor(df_plot$winner, levels = c("0", "1", "2", "3", "4", "tie"), order = TRUE)
-levels(df_plot$winner) <- c("IP culling", "IP & DC culling", "Ring culling (3km)", "Ring vaccination (3km)", "Ring vaccination (10km)", "Tie")
+levels(df_plot$winner) <- c("IP culling (IP)", "IP & DC culling (IPDC)", "Ring culling (3km) (RC3)", "Ring vaccination (3km) (V3)", "Ring vaccination (10km) (V10)", "Tie")
+
+df_plot$biased_candidate <- factor(df_plot$biased_candidate, levels = c("0", "1", "2", "3", "4"), order = TRUE)
+levels(df_plot$biased_candidate) <- c("IP", "IPDC", "RC3", "V3", "V10")
 
 p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
     geom_bar(stat = "identity", width = 1) +
@@ -72,13 +75,15 @@ p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
         panel.spacing = unit(1, "lines"),
         axis.text = element_text(size = 16),
         axis.title = element_text(size = 20),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 16),
         strip.text = element_text(size = 20),
-        legend.position = "top"
+        legend.position = "right"
     ) +
     xlab("Number of additional models with interventions biased") +
     ylab("Percent of experiments with intervention ranked as best using voting rule")
 
-ggsave(paste0(output_file_fmd_cattle_culled, ".", file_format), p, width = 4*3+1, height = 5*3+0.5)
+ggsave(paste0(output_file_fmd_cattle_culled, ".", file_format), p, width = 5*3+1, height = 5*3+0.5)
 
 
 #####################################################################
@@ -88,8 +93,10 @@ ggsave(paste0(output_file_fmd_cattle_culled, ".", file_format), p, width = 4*3+1
 df_plot <- df_random[grepl("fmd_data_votes_duration", df_random$dataset),]
 
 df_plot$winner <- factor(df_plot$winner, levels = c("0", "1", "2", "3", "4", "tie"), order = TRUE)
-levels(df_plot$winner) <- c("IP culling", "IP & DC culling", "Ring culling (3km)", "Ring vaccination (3km)", "Ring vaccination (10km)", "Tie")
+levels(df_plot$winner) <- c("IP culling (IP)", "IP & DC culling (IPDC)", "Ring culling (3km) (RC3)", "Ring vaccination (3km) (V3)", "Ring vaccination (10km) (V10)", "Tie")
 
+df_plot$biased_candidate <- factor(df_plot$biased_candidate, levels = c("0", "1", "2", "3", "4"), order = TRUE)
+levels(df_plot$biased_candidate) <- c("IP", "IPDC", "RC3", "V3", "V10")
 
 p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
     geom_bar(stat = "identity", width = 1) +
@@ -105,13 +112,15 @@ p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
         panel.spacing = unit(1, "lines"),
         axis.text = element_text(size = 16),
         axis.title = element_text(size = 20),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 16),
         strip.text = element_text(size = 20),
-        legend.position = "top"
+        legend.position = "right"
     ) +
     xlab("Number of additional models with interventions biased") +
     ylab("Percent of experiments with intervention ranked as best using voting rule")
 
-ggsave(paste0(output_file_fmd_duration, ".", file_format), p, width = 4*3+1, height = 5*3+0.5)
+ggsave(paste0(output_file_fmd_duration, ".", file_format), p, width = 5*3+1, height = 5*3+0.5)
 
 
 ##############################################################
@@ -124,13 +133,16 @@ df_plot$winner <- factor(df_plot$winner,
     levels = c("0", "1", "2", "3", "4", "5", "tie"), order = TRUE)
 
 levels(df_plot$winner) <- c(
-    "Increasing hospitalization proportion", 
-    "No management", 
-    "Reducing community transmission", 
-    "Reducing funeral transmission", 
-    "Reducing hospital transmission",
-    "Reducing mortality ratio", 
+    "Increasing hospitalization proportion (IHP)", 
+    "No management (NM)", 
+    "Reducing community transmission (RCT)", 
+    "Reducing funeral transmission (RFT)", 
+    "Reducing hospital transmission (RHT)",
+    "Reducing mortality ratio (RMR)", 
     "Tie")
+
+df_plot$biased_candidate <- factor(df_plot$biased_candidate, levels = c("0", "1", "2", "3", "4", "5"), order = TRUE)
+levels(df_plot$biased_candidate) <- c("IHP", "NM", "RCT", "RFT", "RHT", "RMR")
 
 p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) + 
     geom_bar(stat = "identity", width = 1) + 
@@ -144,13 +156,15 @@ p <- ggplot(df_plot, aes(x = number_biased_models, y = n, fill = winner)) +
         panel.grid.minor = element_blank(),
         strip.background = element_blank(),
         panel.spacing = unit(1, "lines"),
-        axis.text.y = element_text(size = 12), 
-        axis.title.x = element_text(size = 14), 
-        axis.title.y = element_text(size = 14), 
-        strip.text = element_text(size = 20),
-        legend.position = "top"
+        axis.text = element_text(size = 18), 
+        axis.title.x = element_text(size = 24), 
+        axis.title.y = element_text(size = 24), 
+        legend.title = element_text(size = 26),
+        legend.text = element_text(size = 26),
+        strip.text = element_text(size = 28),
+        legend.position = "right"
     ) + 
     xlab("Number of additional models with interventions ranked randomly") + 
     ylab("Percent of experiments with intervention ranked as best using voting rule")
 
-ggsave(paste0(output_file_ebola, ".", file_format), p, width = 4*3+1, height = 6*3+0.5)
+ggsave(paste0(output_file_ebola, ".", file_format), p, width = 8*3+1, height = 8*3+0.5)
