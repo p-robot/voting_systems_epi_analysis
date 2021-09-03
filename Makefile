@@ -32,7 +32,6 @@ mean_projections:
 		"data/processed/" \
 		"output/tables/"
 
-
 ########################
 # Sensitivity analyses
 # ----------------------
