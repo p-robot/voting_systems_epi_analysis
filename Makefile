@@ -27,6 +27,11 @@ main_analysis: data
 		"data/processed/" \
 		"output/tables/"
 
+mean_projections:
+	python src/analysis/calculate_mean_projections_case_studies.py \
+		"data/processed/" \
+		"output/tables/"
+
 
 ########################
 # Sensitivity analyses
