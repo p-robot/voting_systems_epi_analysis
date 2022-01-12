@@ -8,6 +8,10 @@
 # ---------
 require(tidyverse)
 require(ggplot2)
+require(here)
+
+# For "okabe_ito_colors"
+source(file.path(here(), "src", "viz", "plotting_constants.R"))
 
 ######################################
 # Parse command line args
@@ -60,7 +64,7 @@ p <- ggplot(df_plot, aes(x = number_random_models, y = n, fill = winner)) +
     geom_bar(stat = "identity", width = 1) +
     facet_grid(cols = vars(vote_processing_rule), rows = vars(dataset_name)) +
     theme_classic() + coord_fixed(ratio = 0.5) +
-    scale_fill_brewer(name = "Chosen intervention", palette = "Set1", drop = FALSE) +
+    scale_fill_manual(name = "Chosen intervention", values = okabe_ito_colors, drop = FALSE) +
     scale_x_continuous(breaks = c(1, 25, 50), expand = c(0, 0)) +
     scale_y_continuous(breaks = seq(0, 100, 20), expand = c(0, 0)) +
     theme(
@@ -103,7 +107,7 @@ p <- ggplot(df_plot, aes(x = number_random_models, y = n, fill = winner)) +
     geom_bar(stat = "identity", width = 1) + 
     facet_grid(cols = vars(vote_processing_rule), rows = vars(dataset_name)) + 
     theme_classic() + coord_fixed(ratio = 370/100) + 
-    scale_fill_brewer(name = "Chosen intervention", palette = "Set3", drop = FALSE) + 
+    scale_fill_manual(name = "Chosen intervention", values = okabe_ito_colors, drop = FALSE) + 
     scale_x_continuous(breaks = c(1, 100, 200, 300, 370), expand = c(0, 0)) + 
     scale_y_continuous(breaks = seq(0, 100, 20), expand = c(0, 0)) + 
     theme(

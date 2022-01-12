@@ -8,6 +8,10 @@
 require(tidyverse)
 require(ggplot2)
 require(reshape2)
+require(here)
+
+# For "okabe_ito_colors"
+source(file.path(here(), "src", "viz", "plotting_constants.R"))
 
 ######################################
 # Parse command line args
@@ -58,8 +62,8 @@ p <- ggplot(df_values, aes(x = intervention, y = value, colour = intervention,
             fill = intervention)) + 
     geom_violin(width = 1.0, alpha = 0.8) + 
     facet_grid(cols = vars(model), rows = vars(objective_label), scales = "free_y") + 
-    scale_fill_brewer(name = "Intervention", palette = "Set1") + 
-    scale_colour_brewer(name = "Intervention", palette = "Set1") + 
+    scale_fill_manual(name = "Intervention", values = okabe_ito_colors) + 
+    scale_colour_manual(name = "Intervention", values = okabe_ito_colors) + 
     scale_y_continuous(labels = scales::comma) + 
     xlab("") + ylab("") + 
     theme_classic() + 
