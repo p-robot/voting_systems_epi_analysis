@@ -4,6 +4,9 @@
 Python code for applying vote-processing rules to output from multiple epidemiological models.  This repository contains the scripts for running the analysis in the manuscript, the code for the vote processing rules is housed in a separate Python module (`voting_systems`).  
 
 
+A slide deck of the different voting rules and some of the tests used to verify the coded algorithms is provided in [doc/voting_systems.pdf](doc/voting_systems.pdf).  
+
+
 ### Data requirements
 
 Two datasets are required to run the analyses: 
