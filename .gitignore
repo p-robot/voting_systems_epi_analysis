@@ -7,6 +7,9 @@ docs
 .Rhistory
 output/figures/*.pdf
 
+output/figures/*.png
+output/tables/*.csv
+
 # Mac-related files
 .DS_Store
 

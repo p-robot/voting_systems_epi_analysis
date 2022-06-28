@@ -87,3 +87,15 @@ fig_ebola_data: data_ebola
 		"data/processed/ebola_data_cleaned.csv" \
 		"output/figures/figS2_ebola_raw_data" \
 		"png"
+
+
+#####################
+# Magazine submission
+# -------------------
+
+fig_random_models_culls:
+	Rscript src/viz/plot_analysis_random_models_culls.R \
+		"output/tables/results_sensitivity_analysis_random_models_N100.csv" \
+		"output/figures/fig2_sensitivity_analysis_random_models_N100_culls" \
+		"png"
+
