@@ -60,7 +60,7 @@ fig_random_models:
 		"output/tables/results_sensitivity_analysis_random_models_N100.csv" \
 		"output/figures/fig2_sensitivity_analysis_random_models_N100" \
 		"output/figures/fig3_sensitivity_analysis_random_models_N100_ebola" \
-		"png"
+		"pdf"
 
 # Figure of the input data (figure 2 and S3)
 fig_biased_models:
@@ -96,6 +96,12 @@ fig_ebola_data: data_ebola
 fig_random_models_culls:
 	Rscript src/viz/plot_analysis_random_models_culls.R \
 		"output/tables/results_sensitivity_analysis_random_models_N100.csv" \
-		"output/figures/fig2_sensitivity_analysis_random_models_N100_culls" \
+		"output/figures/fig2_sensitivity_analysis_random_models_N100_culls_MT" \
+		"png"
+
+fig_random_models_ebola:
+	Rscript src/viz/plot_analysis_random_models_ebola_MT.R \
+		"output/tables/results_sensitivity_analysis_random_models_N100.csv" \
+		"output/figures/fig3_sensitivity_analysis_random_models_N100_ebola_MT" \
 		"png"
 

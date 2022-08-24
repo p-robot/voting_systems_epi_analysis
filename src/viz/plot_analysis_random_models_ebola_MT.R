@@ -20,7 +20,7 @@ source(file.path(here(), "src", "viz", "plotting_constants.R"))
 args <- commandArgs(trailingOnly = TRUE)
 
 input_file <- args[1]
-output_file_fmd <- args[2]
+output_file_ebola <- args[2]
 file_format <- args[3]
 
 ######################################
@@ -50,37 +50,45 @@ df_random <- df %>%
     tally()
 
 
-################################################
-# Plot data from experiment using FMD case study
-# ----------------------------------------------
+###################################################
+# Plot data from experiment using Ebola case study
+# -------------------------------------------------
 
-df_plot <- df_random[grepl("fmd", df_random$dataset),]
+df_plot <- df_random[grepl("ebola", df_random$dataset),]
 
-df_plot$winner <- factor(df_plot$winner, levels = c("0", "1", "2", "3", "4", "tie"), order = TRUE)
-levels(df_plot$winner) <- c("IP", "IPDC", "RC3", "RV3", "RV10", "Tie")
+df_plot$winner <- factor(df_plot$winner, 
+    levels = c("0", "1", "2", "3", "4", "5", "tie"), order = TRUE)
 
-p <- ggplot(subset(df_plot, dataset_name == "Cattle culled"), 
-    aes(x = number_random_models, y = n, fill = winner)) +
-    geom_bar(stat = "identity", width = 1) +
-    facet_grid(cols = vars(vote_processing_rule)) +
-    theme_classic() + coord_fixed(ratio = 0.5) +
-    scale_fill_manual(name = "Chosen intervention", values = okabe_ito_colors, drop = FALSE) +
-    scale_x_continuous(breaks = c(1, 25, 50), expand = c(0, 0)) +
-    scale_y_continuous(breaks = seq(0, 100, 20), expand = c(0, 0)) +
+levels(df_plot$winner) <- c(
+    "IHP", 
+    "NM", 
+    "RCT", 
+    "RFT", 
+    "RHT",
+    "RMR", 
+    "Tie")
+
+p <- ggplot(df_plot, aes(x = number_random_models, y = n, fill = winner)) + 
+    geom_bar(stat = "identity", width = 1) + 
+    facet_grid(cols = vars(vote_processing_rule), rows = vars(dataset_name)) + 
+    theme_classic() + coord_fixed(ratio = 370/100) + 
+    scale_fill_manual(name = "Chosen intervention", values = okabe_ito_colors, drop = FALSE) + 
+    scale_x_continuous(breaks = c(1, 100, 200, 300, 370), expand = c(0, 0)) + 
+    scale_y_continuous(breaks = seq(0, 100, 20), expand = c(0, 0)) + 
     theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         strip.background = element_blank(),
         panel.spacing = unit(1, "lines"),
-        axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14),
-        strip.text = element_text(size = 14),
+        axis.text.x = element_text(size = 12), 
+        axis.text.y = element_text(size = 12), 
+        axis.title = element_text(size = 14),  
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 14),
+        strip.text = element_text(size = 14),
         legend.position = "right"
-    ) +
-    xlab("Number of additional models with interventions ranked randomly") +
-    ylab("Percent of experiments with\nintervention ranked as best")
+    ) + 
+    xlab("Number of additional models with interventions ranked randomly") + 
+    ylab("Percent of experiments\nwith intervention ranked as best")
 
-ggsave(paste0(output_file_fmd, ".", file_format), p, width = 4*3+1, height = 2*3+0.5)
-
+ggsave(paste0(output_file_ebola, ".", file_format), p, width = 4*3+1, height = 1*3+0.5)
